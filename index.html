@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A gift for Sam · PTE CENTER</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#15112b">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PTE CENTER">
+<meta property="og:title" content="🎁 A gift for Sam">
+<meta property="og:description" content="Your Session 3 notes from PTE CENTER. Tap to open.">
+<meta property="og:url" content="https://ashzeraat-web.github.io/pte-center-gift-sample/">
+<meta property="og:image" content="https://ashzeraat-web.github.io/pte-center-gift-sample/preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A wrapped gift with the words: A gift for Sam, your Session 3 notes, from PTE CENTER">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  body { margin: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@500;600&family=Inter:wght@400;500;600&display=swap">
+<style>
+  /* Layout: one screen, like a story. A row of slides that snap one at a time: the wrapped gift first,
+     then the session's cards, then a last slide that saves the PDF. Progress bars on top, arrows below. */
+  :root {
+    --ink: #15112b;
+    --ink-2: #221a45;
+    --fg: #f3f0fb;
+    --muted: #b4abd3;
+    --gold: #f3b95f;
+    --on-gold: #2a1a05;
+    --focus: #e4ff90;
+    --track: #3a3166;
+    --line: #342a63;
+    --shadow: rgba(6, 3, 22, 0.55);
+    --font-display: "DynaPuff", "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --radius: 18px;
+    color-scheme: dark;
+  }
+  html { height: 100%; box-sizing: border-box; }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    height: 100%; overflow: hidden;
+    background: radial-gradient(120% 60% at 50% 0%, #2c1d57 0%, transparent 70%) no-repeat, var(--ink);
+    color: var(--fg); font-family: var(--font-body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 12px;
+  }
+  .app { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; max-width: 520px; margin-inline: auto; }
+
+  .progress { display: flex; gap: 4px; }
+  .progress span { flex: 1; height: 3px; border-radius: 2px; background: var(--track); transition: background 0.25s; }
+  .progress span.on { background: var(--gold); }
+
+  .track {
+    display: flex; height: 100%; min-height: 0; overflow-x: auto; overflow-y: hidden;
+    scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch; outline: none;
+  }
+  .track::-webkit-scrollbar { display: none; }
+  .slide {
+    flex: 0 0 100%; height: 100%; min-width: 0; display: grid; place-items: center;
+    scroll-snap-align: center; scroll-snap-stop: always; container-type: size;
+  }
+  /* each card is as large as the slide allows while staying 9:16 */
+  .card, .gift, .keep {
+    width: min(100%, 56vh); width: min(100cqw, calc(100cqh * 9 / 16)); height: auto; aspect-ratio: 9 / 16;
+    border-radius: var(--radius); box-shadow: 0 18px 40px var(--shadow); background: var(--ink-2);
+  }
+  .card { display: block; object-fit: cover; user-select: none; -webkit-user-drag: none; }
+
+  /* The gift */
+  .gift { position: relative; display: block; padding: 0; border: 0; overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .gift video, .gift .still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gift .still { opacity: 0; transition: opacity 0.6s ease; }
+  .gift .still.in { opacity: 1; }
+  .gift::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 3px var(--gold); opacity: 0; }
+  .gift.closed::after { animation: breathe 2.4s ease-in-out infinite; }
+  @keyframes breathe { 50% { opacity: 0.6; } }
+  .gift:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+  .tap {
+    position: absolute; left: 50%; bottom: 6%; transform: translateX(-50%);
+    padding: 11px 20px; border-radius: 999px; background: var(--gold); color: var(--on-gold);
+    font: 600 15px/1.2 var(--font-body); white-space: nowrap; box-shadow: 0 8px 20px var(--shadow);
+  }
+
+  /* The last slide */
+  .keep {
+    display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 28px 24px;
+    border: 1px solid var(--line); text-align: left; overflow: auto;
+  }
+  .eyebrow { margin: 0; font: 600 12px/1.4 var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .keep h2 { margin: 0; font: 600 30px/1.1 var(--font-display); text-wrap: balance; }
+  .keep p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--muted); }
+  .save {
+    align-self: flex-start; display: inline-block; padding: 13px 22px; border: 0; border-radius: 999px;
+    background: var(--gold); color: var(--on-gold); font: 600 16px/1 var(--font-body); text-decoration: none; cursor: pointer;
+  }
+  .save:disabled { opacity: 0.6; cursor: default; }
+  .save:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  .status { min-height: 1.3em; font-size: 14px; }
+  .from { margin-top: auto; font: 600 12px/1.4 var(--font-body); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+
+  /* Arrows and counter */
+  .nav { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .nav button {
+    width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--ink-2); color: var(--fg); cursor: pointer;
+  }
+  .nav button:disabled { opacity: 0.35; cursor: default; }
+  .nav button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .nav svg { width: 20px; height: 20px; }
+  .nav .pulse { animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(243, 185, 95, 0.28); border-color: var(--gold); } }
+  .count { min-width: 9.5em; text-align: center; font: 500 14px/1.2 var(--font-body); color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gift.closed::after, .nav .pulse { animation: none; }
+    .gift .still, .progress span { transition: none; }
+  }
+</style>
+
+</head>
+<body>
+<main class="app" aria-roledescription="carousel" aria-label="Your session notes">
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <div class="track" id="track" tabindex="0">
+    <section class="slide" aria-roledescription="slide" aria-label="Your gift">
+      <button class="gift closed" id="gift" type="button" aria-label="Open your gift">
+        <video id="giftVideo" muted playsinline preload="auto" poster="poster.jpg" width="1080" height="1920" aria-hidden="true">
+          <source src="gift.mp4" type="video/mp4">
+        </video>
+        <img id="giftStill" class="still" src="01-cover.jpg" width="1080" height="1920" alt="For Sam: The City That Started Christmas Early. Session 3, from PTE CENTER." hidden>
+        <span class="tap" id="tapPill">Tap the gift to open it</span>
+      </button>
+    </section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="02-numbers.jpg" width="1080" height="1920" alt="You did the talking: your speaking time, words and longest answer."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="03-well.jpg" width="1080" height="1920" alt="What you do well."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="04-tutor.jpg" width="1080" height="1920" alt="A note from your tutor."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="05-fixed.jpg" width="1080" height="1920" loading="lazy" alt="What you fixed since last time."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="06-level.jpg" width="1080" height="1920" loading="lazy" alt="Your speaking level this session."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="07-levelx.jpg" width="1080" height="1920" loading="lazy" alt="What your level means, part 1 of 2."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="08-levelx-2.jpg" width="1080" height="1920" loading="lazy" alt="What your level means, part 2 of 2."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="09-parts.jpg" width="1080" height="1920" loading="lazy" alt="Your minutes, part by part."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="10-fixes.jpg" width="1080" height="1920" loading="lazy" alt="Every correction, part 1 of 2."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="11-fixes-2.jpg" width="1080" height="1920" loading="lazy" alt="Every correction, part 2 of 2."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="12-local.jpg" width="1080" height="1920" loading="lazy" alt="Say it like a local."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="13-auslines.jpg" width="1080" height="1920" loading="lazy" alt="Your sentences, the Aussie way."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="14-words.jpg" width="1080" height="1920" loading="lazy" alt="The three expressions we covered."></section>
+    <section class="slide" aria-roledescription="slide"><img class="card" src="15-next.jpg" width="1080" height="1920" loading="lazy" alt="What happens next. See you next time!"></section>
+    <section class="slide" aria-roledescription="slide" aria-label="Keep your notes">
+      <div class="keep">
+        <p class="eyebrow">Session 3 · The City That Started Christmas Early</p>
+        <h2>Keep your notes</h2>
+        <p>The same cards in one PDF file, to keep on your phone and look back on before your next session.</p>
+        <button class="save" id="savePdf" type="button" hidden>Save the PDF</button>
+        <a class="save" id="pdfLink" href="notes.pdf" download="PTE-CENTER-Session-03-Notes.pdf" hidden>Save the PDF</a>
+        <p class="status" id="saveStatus" role="status"></p>
+        <p class="from">From PTE CENTER</p>
+      </div>
+    </section>
+  </div>
+
+  <nav class="nav" aria-label="Cards">
+    <button id="prev" type="button" aria-label="Previous card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <span class="count" id="count" aria-live="polite"></span>
+    <button id="next" type="button" aria-label="Next card"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+  </nav>
+</main>
+
+<script>
+(() => {
+  const track = document.getElementById('track');
+  const slides = [...track.querySelectorAll('.slide')];
+  const bar = document.getElementById('progress');
+  const count = document.getElementById('count');
+  const prev = document.getElementById('prev');
+  const next = document.getElementById('next');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const n = slides.length;
+  let at = 0;
+  let opened = false;
+
+  slides.forEach(() => bar.appendChild(document.createElement('span')));
+  const segs = [...bar.children];
+
+  function paint() {
+    segs.forEach((s, j) => s.classList.toggle('on', j <= at));
+    prev.disabled = at === 0;
+    next.disabled = at === n - 1;
+    const hint = at === 0 && opened;
+    count.textContent = hint ? 'Swipe for your notes' : (at + 1) + ' / ' + n;
+    next.classList.toggle('pulse', hint);
+  }
+  function go(k) {
+    k = Math.max(0, Math.min(n - 1, k));
+    track.scrollTo({ left: k * track.clientWidth, behavior: reduce.matches ? 'auto' : 'smooth' });
+  }
+  let raf = 0;
+  track.addEventListener('scroll', () => {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      const k = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
+      if (k !== at) { at = k; paint(); }
+    });
+  });
+  window.addEventListener('resize', () => { track.scrollLeft = at * track.clientWidth; });
+  prev.addEventListener('click', () => go(at - 1));
+  next.addEventListener('click', () => go(at + 1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { go(at + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { go(at - 1); e.preventDefault(); }
+  });
+
+  // The gift: tap, the film plays, then it settles on the name card.
+  const gift = document.getElementById('gift');
+  const vid = document.getElementById('giftVideo');
+  const still = document.getElementById('giftStill');
+  const tap = document.getElementById('tapPill');
+  let state = 'closed', noVideo = false, timer = 0;
+  vid.querySelector('source').addEventListener('error', () => {
+    fetch('gift.mp4')
+      .then((r) => { if (!r.ok) throw new Error('missing'); return r.blob(); })
+      .then((b) => { vid.src = URL.createObjectURL(b); vid.load(); })
+      .catch(() => { noVideo = true; });
+  });
+  function settle() {
+    clearTimeout(timer);
+    state = 'open'; opened = true;
+    gift.classList.remove('closed');
+    still.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => still.classList.add('in')));
+    gift.setAttribute('aria-label', 'Your gift is open. Tap to open it again');
+    paint();
+  }
+  gift.addEventListener('click', () => {
+    if (state === 'playing') return;
+    tap.hidden = true;
+    still.classList.remove('in');
+    still.hidden = true;
+    if (reduce.matches || noVideo) { settle(); return; }
+    state = 'playing';
+    gift.classList.remove('closed');
+    try { vid.currentTime = 0; } catch (e) { /* not seekable yet */ }
+    const p = vid.play();
+    if (p && typeof p.catch === 'function') p.catch(settle);
+    timer = setTimeout(settle, 9000);
+  });
+  vid.addEventListener('ended', settle);
+
+  // The PDF: through the viewer's save prompt where there is one, else a plain download link.
+  const save = document.getElementById('savePdf');
+  const link = document.getElementById('pdfLink');
+  const status = document.getElementById('saveStatus');
+  const hasClaude = window.claude && typeof window.claude.use === 'function';
+  if (!hasClaude) link.hidden = false;
+  else {
+    Promise.resolve(window.claude.use('downloads')).then((dl) => {
+      if (!dl) { status.textContent = 'Your PDF also comes to you on WhatsApp.'; return; }
+      save.hidden = false;
+      save.addEventListener('click', async () => {
+        save.disabled = true;
+        status.textContent = 'Getting the file ready…';
+        try {
+          const r = await fetch('notes.pdf');
+          if (!r.ok) throw { code: 'missing' };
+          const res = await dl.save({ filename: 'PTE-CENTER-Session-03-Notes.pdf', data: await r.blob() });
+          status.textContent = res && res.status === 'delivered' ? '' : 'Saved.';
+        } catch (e) {
+          const code = e && e.code;
+          if (code === 'declined') status.textContent = '';
+          else if (code === 'rate_limited') status.textContent = 'Please try again in a moment.';
+          else status.textContent = 'The PDF could not be saved here.';
+        } finally { save.disabled = false; }
+      });
+    }).catch(() => {});
+  }
+
+  paint();
+})();
+</script>
+</body>
+</html>
