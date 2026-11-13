@@ -174,13 +174,13 @@ void main() {
   float d = dot(p, uN) - uS;                       // how far past the line where the sheet leaves the page below
   vec3 below = uHasUnder > 0.5 ? tex(uUnder, p) : uBg;
   vec3 col = below * (1.0 - 0.5 * exp(-max(d - uR, 0.0) / 0.075));   // shadow of the roll on the page below
-  if (d < 0.0) col = tex(uFront, p) * (1.0 - 0.24 * exp(d / 0.03));    // still lying flat; darker where it starts to lift
+  if (d < 0.0) col = tex(uFront, p) * (1.0 - 0.1 * exp(d / 0.03));     // still lying flat; a little darker where it starts to lift
   float e = uPx * 0.8;
   if (d >= 0.0 && d <= uR) {                        // lower half of the roll: the printed side, turning away from the light
     float th = asin(clamp(d / uR, 0.0, 1.0));
     vec2 q = p + (uR * th - d) * uN;
     float k = inside(q, e);
-    float light = 1.0 - 0.5 * pow(d / uR, 1.7);
+    float light = 0.9 - 0.4 * pow(d / uR, 1.7);     // carries on from the flat part (0.9 at the lift), no seam
     col = mix(col, tex(uFront, q) * light, k);
   }
   if (d <= uR) {                                    // upper half of the roll and the part lying on top: the back of the sheet
@@ -194,10 +194,10 @@ void main() {
       vec3 back = mix(vec3(0.972, 0.962, 0.945), tex(uFront, q), 0.12);   // paper, with the print faintly showing through
       float light;
       if (d >= 0.0) {
-        light = 0.74 + 0.26 * clamp(-cos(al), 0.0, 1.0);
+        light = 0.74 + 0.24 * clamp(-cos(al), 0.0, 1.0);                  // 0.98 on top of the roll, same as the part lying on top
         light += 0.2 * pow(max(0.0, cos(al - 0.7 * PI)), 16.0);           // a soft gloss along the bend
       } else {
-        light = 0.98 - 0.12 * exp(d / 0.04);
+        light = 0.98;                                                       // faces the light like the top of the roll: no crease line
       }
       col = mix(col, back * light, k);
     }
