@@ -18,10 +18,11 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@500;600&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&display=swap">
 <style>
-  /* Layout: one screen holding a small book. The wrapped gift sits on top of it; once the gift opens,
-     the name card is the book's first page and every card after it is turned like a real page. */
+  /* Layout: one screen holding a small book of cards. The wrapped gift sits on top; once it opens, the name card
+     is page one. Pages are paper: a finger lifts a corner and the sheet bends round a roll as it turns (drawn with
+     WebGL: front, the back of the sheet with the print showing through, light on the bend, shadow on the page below). */
   :root {
     --ink: #15112b;
     --ink-2: #221a45;
@@ -32,7 +33,6 @@
     --focus: #e4ff90;
     --line: #342a63;
     --shadow: rgba(6, 3, 22, 0.55);
-    --font-display: "DynaPuff", "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
     --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --radius: 14px;
     color-scheme: dark;
@@ -48,19 +48,14 @@
     padding-block: 14px 12px;
     -webkit-tap-highlight-color: transparent;
   }
-  img { max-width: 100%; }
   [hidden] { display: none !important; }
   .app { height: 100%; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 12px; max-width: 520px; margin-inline: auto; }
-
   .stage { min-height: 0; display: grid; place-items: center; container-type: size; }
-  .frame {
-    position: relative; width: min(100%, 56vh); width: min(100cqw, calc(100cqh * 9 / 16)); aspect-ratio: 9 / 16;
-    filter: drop-shadow(0 18px 30px var(--shadow));
-  }
+  .frame { position: relative; width: min(100%, 56vh); width: min(100cqw, calc(100cqh * 9 / 16)); aspect-ratio: 9 / 16; }
+  .frame::before { content: ""; position: absolute; inset: 2% 3% -1%; border-radius: var(--radius); box-shadow: 0 22px 44px var(--shadow); }
 
-  /* the gift */
   .gift {
-    position: absolute; inset: 0; z-index: 3; display: block; padding: 0; border: 0; overflow: hidden;
+    position: absolute; inset: 0; z-index: 5; display: block; padding: 0; border: 0; overflow: hidden;
     border-radius: var(--radius); background: var(--ink-2); cursor: pointer; transition: opacity 0.5s ease;
   }
   .gift video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -75,23 +70,15 @@
     font: 600 15px/1.2 var(--font-body); white-space: nowrap; box-shadow: 0 8px 20px var(--shadow);
   }
 
-  /* the book */
-  .book { position: absolute; inset: 0; z-index: 1; touch-action: none; -webkit-user-select: none; user-select: none; }
-  .page { background: var(--ink-2); overflow: hidden; }
-  .page img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; pointer-events: none; }
-  .page.keep { background: #221a45; color: var(--fg); }
-  .keep-in { height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 9% 8%; }
-  .keep .eyebrow { margin: 0; font: 600 12px/1.4 var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-  .keep h2 { margin: 0; font: 600 30px/1.1 var(--font-display); }
-  .keep p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--muted); }
-  .keep .save {
-    align-self: flex-start; display: inline-block; padding: 13px 22px; border-radius: 999px; background: var(--gold); color: var(--on-gold);
-    font: 600 16px/1 var(--font-body); text-decoration: none;
-  }
-  .keep .from { margin-top: 18px; font: 600 12px/1.4 var(--font-body); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+  .book { position: absolute; inset: 0; z-index: 1; border-radius: var(--radius); overflow: hidden; background: var(--ink-2);
+    touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+  .book canvas, .book .flat { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .book .flat { object-fit: cover; }
+  .hit { position: absolute; left: 8.9%; top: 56.7%; width: 39.4%; height: 6.4%; border-radius: 999px; }
+  .hit:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-  /* arrows and page counter */
-  .nav { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .nav { display: flex; align-items: center; justify-content: center; gap: 18px; position: relative; z-index: 6; }
   .nav button {
     width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
     border: 1px solid var(--line); background: var(--ink-2); color: var(--fg); cursor: pointer;
@@ -102,18 +89,19 @@
   .nav .pulse { animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(243, 185, 95, 0.28); border-color: var(--gold); } }
   .count { min-width: 9.5em; text-align: center; font: 500 14px/1.2 var(--font-body); color: var(--muted); font-variant-numeric: tabular-nums; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .gift.closed::after, .nav .pulse { animation: none; }
-    .gift { transition: none; }
-  }
+  @media (prefers-reduced-motion: reduce) { .gift.closed::after, .nav .pulse { animation: none; } .gift { transition: none; } }
 </style>
 </head>
 <body>
 <main class="app" aria-label="Your session notes">
   <div class="stage">
     <div class="frame" id="frame">
-      <div class="book" id="book" aria-live="polite"></div>
+      <div class="book" id="book">
+        <canvas id="cv"></canvas>
+        <img class="flat" id="flat" alt="" src="01-cover.jpg">
+        <a class="hit" id="pdfHit" href="notes.pdf" download="PTE-CENTER-Session-03-Notes.pdf" aria-label="Save the PDF" hidden></a>
+        <p class="sr" id="pageText" aria-live="polite"></p>
+      </div>
       <button class="gift closed" id="gift" type="button" aria-label="Open your gift">
         <video id="giftVideo" muted playsinline preload="auto" poster="poster.jpg" width="1080" height="1920" aria-hidden="true">
           <source src="gift.mp4" type="video/mp4">
@@ -129,95 +117,295 @@
   </nav>
 </main>
 
-<!-- the book's pages, handed to the page-turn library -->
-<div id="pages" hidden>
-  <div class="page"><img src="01-cover.jpg" alt="For Sam: The City That Started Christmas Early. Session 3, from PTE CENTER."></div>
-  <div class="page"><img src="02-numbers.jpg" alt="You did the talking: your speaking time, words and longest answer."></div>
-  <div class="page"><img src="03-well.jpg" alt="What you do well."></div>
-  <div class="page"><img src="04-tutor.jpg" alt="A note from your tutor."></div>
-  <div class="page"><img src="05-fixed.jpg" alt="What you fixed since last time."></div>
-  <div class="page"><img src="06-level.jpg" alt="Your speaking level this session."></div>
-  <div class="page"><img src="07-levelx.jpg" alt="What your level means, part 1 of 2."></div>
-  <div class="page"><img src="08-levelx-2.jpg" alt="What your level means, part 2 of 2."></div>
-  <div class="page"><img src="09-parts.jpg" alt="Your minutes, part by part."></div>
-  <div class="page"><img src="10-fixes.jpg" alt="Every correction, part 1 of 2."></div>
-  <div class="page"><img src="11-fixes-2.jpg" alt="Every correction, part 2 of 2."></div>
-  <div class="page"><img src="12-local.jpg" alt="Say it like a local."></div>
-  <div class="page"><img src="13-auslines.jpg" alt="Your sentences, the Aussie way."></div>
-  <div class="page"><img src="14-words.jpg" alt="The three expressions we covered."></div>
-  <div class="page"><img src="15-next.jpg" alt="What happens next. See you next time!"></div>
-  <div class="page keep"><div class="keep-in">
-    <p class="eyebrow">Session 3 · The City That Started Christmas Early</p>
-    <h2>Keep your notes</h2>
-    <p>The same cards in one PDF file, to keep on your phone and look back on before your next session.</p>
-    <a class="save" href="notes.pdf" download="PTE-CENTER-Session-03-Notes.pdf">Save the PDF</a>
-    <p class="from">From PTE CENTER</p>
-    </div></div>
-</div>
-
-<script src="page-flip.browser.js"></script>
 <script>
 (() => {
-  const frame = document.getElementById('frame');
-  const bookEl = document.getElementById('book');
-  const count = document.getElementById('count');
-  const prev = document.getElementById('prev');
-  const next = document.getElementById('next');
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const source = [...document.querySelectorAll('#pages .page')];
-  const n = source.length;
-  let book = null, at = 0, opened = false, turned = false;
+  // ---------------- the pages ----------------
+  const PAGES = [
+    ['01-cover.jpg', 'For Sam: The City That Started Christmas Early. Session 3, from PTE CENTER.'],
+    ['02-numbers.jpg', 'You did the talking: your speaking time, words and longest answer.'],
+    ['03-well.jpg', 'What you do well.'],
+    ['04-tutor.jpg', 'A note from your tutor.'],
+    ['05-fixed.jpg', 'What you fixed since last time.'],
+    ['06-level.jpg', 'Your speaking level this session.'],
+    ['07-levelx.jpg', 'What your level means, part 1 of 2.'],
+    ['08-levelx-2.jpg', 'What your level means, part 2 of 2.'],
+    ['09-parts.jpg', 'Your minutes, part by part.'],
+    ['10-fixes.jpg', 'Every correction, part 1 of 2.'],
+    ['11-fixes-2.jpg', 'Every correction, part 2 of 2.'],
+    ['12-local.jpg', 'Say it like a local.'],
+    ['13-auslines.jpg', 'Your sentences, the Aussie way.'],
+    ['14-words.jpg', 'The three expressions we covered.'],
+    ['15-next.jpg', 'What happens next. See you next time!'],
+    ['16-keep.jpg', 'Keep your notes: save the same cards as one PDF file.'],
+  ];
+  const N = PAGES.length;
+  const imgs = PAGES.map(([src]) => { const im = new Image(); im.decoding = 'async'; im.src = src; return im; });
+  const ready = (i) => imgs[i] && imgs[i].complete && imgs[i].naturalWidth > 0;
+  const whenReady = (i) => new Promise((res) => { if (ready(i)) res(); else { imgs[i].addEventListener('load', res, { once: true }); imgs[i].addEventListener('error', res, { once: true }); } });
 
+  const $ = (id) => document.getElementById(id);
+  const book = $('book'), cv = $('cv'), flat = $('flat'), pdfHit = $('pdfHit'), pageText = $('pageText');
+  const count = $('count'), prev = $('prev'), next = $('next');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let at = 0, opened = false, turned = false, busy = false;
+
+  // ---------------- WebGL: a sheet of paper rolling round a cylinder ----------------
+  const A = 9 / 16;                       // page width in page units (page height = 1)
+  const gl = cv.getContext('webgl', { antialias: false, premultipliedAlpha: false, alpha: false }) ||
+             cv.getContext('experimental-webgl', { antialias: false, premultipliedAlpha: false, alpha: false });
+  const VS = 'attribute vec2 p; varying vec2 v; void main(){ v = vec2((p.x + 1.0) * 0.5, (1.0 - p.y) * 0.5); gl_Position = vec4(p, 0.0, 1.0); }';
+  const FS = `
+precision highp float;
+varying vec2 v;
+uniform sampler2D uFront, uUnder;
+uniform float uHasUnder, uCurl, uS, uR, uA, uPx;
+uniform vec2 uN;
+uniform vec3 uBg;
+const float PI = 3.14159265;
+vec3 tex(sampler2D t, vec2 q) { return texture2D(t, vec2(q.x / uA, q.y)).rgb; }
+float inside(vec2 q, float e) {
+  vec2 lo = smoothstep(vec2(-e), vec2(e), q);
+  vec2 hi = 1.0 - smoothstep(vec2(uA, 1.0) - e, vec2(uA, 1.0) + e, q);
+  return lo.x * lo.y * hi.x * hi.y;
+}
+void main() {
+  vec2 p = vec2(v.x * uA, v.y);
+  if (uCurl < 0.5) { gl_FragColor = vec4(tex(uFront, p), 1.0); return; }
+  float d = dot(p, uN) - uS;                       // how far past the line where the sheet leaves the page below
+  vec3 below = uHasUnder > 0.5 ? tex(uUnder, p) : uBg;
+  vec3 col = below * (1.0 - 0.5 * exp(-max(d - uR, 0.0) / 0.075));   // shadow of the roll on the page below
+  if (d < 0.0) col = tex(uFront, p) * (1.0 - 0.24 * exp(d / 0.03));    // still lying flat; darker where it starts to lift
+  float e = uPx * 0.8;
+  if (d >= 0.0 && d <= uR) {                        // lower half of the roll: the printed side, turning away from the light
+    float th = asin(clamp(d / uR, 0.0, 1.0));
+    vec2 q = p + (uR * th - d) * uN;
+    float k = inside(q, e);
+    float light = 1.0 - 0.5 * pow(d / uR, 1.7);
+    col = mix(col, tex(uFront, q) * light, k);
+  }
+  if (d <= uR) {                                    // upper half of the roll and the part lying on top: the back of the sheet
+    float al = d >= 0.0 ? PI - asin(clamp(d / uR, 0.0, 1.0)) : PI;
+    float arc = d >= 0.0 ? uR * al : PI * uR - d;
+    vec2 q = p + (arc - d) * uN;
+    float k = inside(q, e);
+    float soft = inside(q, 0.03);
+    col *= 1.0 - 0.3 * max(soft - k, 0.0);          // soft shadow along the edge of the turned-over part
+    if (k > 0.0) {
+      vec3 back = mix(vec3(0.972, 0.962, 0.945), tex(uFront, q), 0.12);   // paper, with the print faintly showing through
+      float light;
+      if (d >= 0.0) {
+        light = 0.74 + 0.26 * clamp(-cos(al), 0.0, 1.0);
+        light += 0.2 * pow(max(0.0, cos(al - 0.7 * PI)), 16.0);           // a soft gloss along the bend
+      } else {
+        light = 0.98 - 0.12 * exp(d / 0.04);
+      }
+      col = mix(col, back * light, k);
+    }
+  }
+  gl_FragColor = vec4(col, 1.0);
+}`;
+  let prog = null, U = {}, texCache = new Map();
+  function compile(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+  if (gl) {
+    try {
+      prog = gl.createProgram();
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FS));
+      gl.linkProgram(prog); if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+      gl.useProgram(prog);
+      const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      ['uFront', 'uUnder', 'uHasUnder', 'uCurl', 'uS', 'uR', 'uA', 'uPx', 'uN', 'uBg'].forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
+      gl.uniform1i(U.uFront, 0); gl.uniform1i(U.uUnder, 1); gl.uniform1f(U.uA, A); gl.uniform3f(U.uBg, 0.133, 0.102, 0.271);
+    } catch (err) { prog = null; }
+  }
+  const webgl = !!prog;
+  if (!webgl) cv.hidden = true;
+
+  function texFor(i) {
+    if (texCache.has(i)) { const t = texCache.get(i); texCache.delete(i); texCache.set(i, t); return t; }
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, imgs[i]);
+    texCache.set(i, t);
+    while (texCache.size > 4) { const [k, old] = texCache.entries().next().value; gl.deleteTexture(old); texCache.delete(k); }
+    return t;
+  }
+  function size() {
+    const r = book.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.max(1, Math.round(r.width * dpr)); cv.height = Math.max(1, Math.round(r.height * dpr));
+    if (webgl) gl.viewport(0, 0, cv.width, cv.height);
+  }
+  // draw: front page index, page below (or -1), and the roll (null = lying flat)
+  function draw(front, under, roll) {
+    if (!webgl) { flat.src = PAGES[front][0]; return; }
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, texFor(front));
+    if (roll && under >= 0) { gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, texFor(under)); }
+    gl.uniform1f(U.uCurl, roll ? 1 : 0);
+    gl.uniform1f(U.uHasUnder, under >= 0 ? 1 : 0);
+    gl.uniform1f(U.uPx, 1 / cv.height);
+    if (roll) { gl.uniform2f(U.uN, roll.n[0], roll.n[1]); gl.uniform1f(U.uS, roll.s); gl.uniform1f(U.uR, roll.R); }
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  // where the roll sits so that the page corner C ends up at F (both in page units); the sheet stays fixed at the spine
+  function solve(g, target) { let lo = 0, hi = Math.PI / 2; for (let i = 0; i < 26; i++) { const m = (lo + hi) / 2; if (g(m) < target) lo = m; else hi = m; } return (lo + hi) / 2; }
+  function rollFor(C, F, free) {
+    let nx = C[0] - F[0], ny = C[1] - F[1];
+    const len = Math.hypot(nx, ny);
+    if (len < 1e-4) return null;
+    nx /= len; ny /= len;
+    if (nx < 0.25) { nx = 0.25; const l = Math.hypot(nx, ny); nx /= l; ny /= l; }
+    const c = C[0] * nx + C[1] * ny, f = F[0] * nx + F[1] * ny, D = Math.max(0, c - f);
+    const R = 0.05 + 0.035 * Math.min(1, D / 0.45);       // a tight roll at the corner that opens up as the sheet lifts
+    const r = D / R;
+    let arc;
+    if (r <= Math.PI / 2 - 1) arc = R * solve((t) => t - Math.sin(t), r);
+    else if (r <= Math.PI) arc = R * (Math.PI - solve((t) => t + Math.sin(t), Math.PI - r));
+    else arc = (D + Math.PI * R) / 2;
+    let s = c - arc;
+    if (!free) s = Math.max(s, 0, ny);
+    return { n: [nx, ny], s, R };
+  }
+
+  // ---------------- turning ----------------
   function paint() {
     if (!opened) return;
     prev.disabled = at === 0;
-    next.disabled = at >= n - 1;
+    next.disabled = at >= N - 1;
     const hint = !turned && at === 0;
-    count.textContent = hint ? 'Turn the page' : (at + 1) + ' / ' + n;
+    count.textContent = hint ? 'Turn the page' : (at + 1) + ' / ' + N;
     next.classList.toggle('pulse', hint);
+    pdfHit.hidden = at !== N - 1 || busy;
+    pageText.textContent = PAGES[at][1];
+  }
+  function rest() { busy = false; flat.src = PAGES[at][0]; flat.hidden = false; if (webgl) { draw(at, -1, null); cv.style.visibility = 'hidden'; } paint(); }
+
+  const ease = (u) => (u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2);
+  const easeOut = (u) => 1 - Math.pow(1 - u, 3);
+  let raf = 0;
+  function play(ms, frame, done) {
+    cancelAnimationFrame(raf);
+    if (reduce.matches) { frame(1); done(); return; }
+    const t0 = performance.now();
+    const step = (now) => { const u = Math.min(1, (now - t0) / ms); frame(u); if (u < 1) raf = requestAnimationFrame(step); else { raf = 0; done(); } };
+    raf = requestAnimationFrame(step);
+  }
+  const lerp = (a, b, u) => a + (b - a) * u;
+
+  // a turn is described by: which page bends (front), which lies below (under), the corner C and where it is now (F)
+  let cur = null;   // { dir: 1 | -1, front, under, C, F, free }
+  function show() { if (!cur) return; draw(cur.front, cur.under, rollFor(cur.C, cur.F, cur.free)); if (!flat.hidden) { cv.style.visibility = 'visible'; flat.hidden = true; } }
+  function startTurn(dir, cornerY) {
+    if (dir > 0 && at >= N - 1) return false;
+    if (dir < 0 && at <= 0) return false;
+    busy = true; pdfHit.hidden = true;
+    const C = [A, cornerY];
+    if (dir > 0) cur = { dir, front: at, under: at + 1, C, F: C.slice(), free: false };
+    else {
+      const R0 = 0.05;
+      cur = { dir, front: at - 1, under: at, C, F: [Math.PI * R0 - A - 0.02, cornerY], free: false };
+    }
+    show();
+    return true;
+  }
+  // let go (or a tap/arrow): finish the turn, or lay the page back down
+  function finishTurn(ok, quick) {
+    const t = cur;
+    const F0 = t.F.slice();
+    if (t.dir > 0 && ok) {
+      const end = [-0.32, t.C[1] + (F0[1] - t.C[1]) * 0.3];
+      play(quick ? 520 : 360, (u) => { const k = quick ? ease(u) : easeOut(u); t.F = [lerp(F0[0], end[0], k), lerp(F0[1], end[1], k) - (quick ? 0.16 * Math.sin(Math.PI * u) : 0)]; show(); }, () => {
+        t.free = true; const F1 = t.F.slice();
+        play(170, (u) => { t.F = [lerp(F1[0], -1.6, u * u), F1[1]]; show(); }, () => { cur = null; at += 1; turned = true; rest(); });
+      });
+    } else if (t.dir > 0) {
+      play(260, (u) => { const k = easeOut(u); t.F = [lerp(F0[0], t.C[0], k), lerp(F0[1], t.C[1], k)]; show(); }, () => { cur = null; rest(); });
+    } else if (ok) {
+      play(quick ? 560 : 380, (u) => { const k = quick ? ease(u) : easeOut(u); t.F = [lerp(F0[0], t.C[0], k), lerp(F0[1], t.C[1], k) - (quick ? 0.12 * Math.sin(Math.PI * u) : 0)]; show(); },
+        () => { cur = null; at -= 1; rest(); });
+    } else {
+      play(220, (u) => { t.F = [lerp(F0[0], F0[0] - 0.25, u), F0[1]]; show(); }, () => {
+        t.free = true; const F1 = t.F.slice();
+        play(150, (u) => { t.F = [lerp(F1[0], -1.6, u * u), F1[1]]; show(); }, () => { cur = null; rest(); });
+      });
+    }
+  }
+  function go(dir) {
+    if (!opened || busy) return;
+    if (!startTurn(dir, 0.92)) return;
+    if (!webgl) { cur = null; at += dir; turned = turned || dir > 0; rest(); return; }
+    finishTurn(true, true);
   }
 
-  // The book is sized to the frame; it is rebuilt if the screen size changes (a phone turned sideways).
-  function build(startAt) {
-    const r = frame.getBoundingClientRect();
-    const w = Math.round(r.width), h = Math.round(r.height);
-    if (book) { try { book.destroy(); } catch (e) {} bookEl.replaceChildren(); }
-    const holder = document.createElement('div');
-    bookEl.appendChild(holder);
-    book = new St.PageFlip(holder, {
-      width: w, height: h, size: 'fixed', usePortrait: true, autoSize: true, showCover: false,
-      drawShadow: true, maxShadowOpacity: 0.55, flippingTime: reduce.matches ? 250 : 850,
-      startPage: startAt || 0, swipeDistance: 20, showPageCorners: true, mobileScrollSupport: true,
-    });
-    book.on('flip', (e) => { at = e.data; if (at > 0) turned = true; paint(); });
-    book.loadFromHTML(source.map((p) => p.cloneNode(true)));
-  }
-  build(0);
-  let resizeTimer = 0;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => build(at), 200);
+  // ---------------- finger, pen or mouse ----------------
+  let drag = null;
+  book.addEventListener('pointerdown', (e) => {
+    if (!opened || busy || (e.button !== undefined && e.button > 0)) return;
+    if (e.target.closest('a')) return;
+    const r = book.getBoundingClientRect();
+    drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t0: performance.now(), H: r.height, top: r.top, left: r.left, W: r.width, dir: 0, trail: [[performance.now(), e.clientX]] };
+    try { book.setPointerCapture(e.pointerId); } catch (err) {}
   });
-
-  prev.addEventListener('click', () => book && book.flipPrev('bottom'));
-  next.addEventListener('click', () => book && book.flipNext('bottom'));
+  book.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+    if (!drag.dir) {
+      if (Math.abs(dx) < 6) return;
+      const y = (drag.y0 - drag.top) / drag.H, cornerY = y < 0.5 ? 0.0 : 1.0;
+      drag.dir = dx < 0 ? 1 : -1;
+      if (!webgl || !startTurn(drag.dir, cornerY)) { drag.dir = 2; return; }
+      drag.F0 = cur.F.slice();
+    }
+    if (drag.dir === 2) return;
+    const now = performance.now();
+    drag.trail.push([now, e.clientX]);
+    while (drag.trail.length > 2 && now - drag.trail[0][0] > 110) drag.trail.shift();
+    const gain = drag.dir > 0 ? 1.05 : 1.75;
+    cur.F = [drag.F0[0] + gain * dx / drag.H, drag.F0[1] + 0.85 * dy / drag.H];
+    show();
+  });
+  function release(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null;
+    const dx = e.clientX - d.x0, dy = e.clientY - d.y0;
+    if (!d.dir) {
+      if (Math.abs(dy) > 12) return;
+      go((e.clientX - d.left) / d.W >= 0.4 ? 1 : -1);    // a tap: the right of the page turns on, the left edge turns back
+      return;
+    }
+    if (d.dir === 2 || !cur) return;
+    const t = d.trail, v = t.length > 1 ? (t[t.length - 1][1] - t[0][1]) / Math.max(1, t[t.length - 1][0] - t[0][0]) : 0;
+    const p = Math.abs(dx) / d.W;
+    const quick = performance.now() - d.t0 < 330 && Math.abs(dx) > 36;
+    const ok = d.dir > 0 ? (p > 0.32 || v < -0.18 || quick) : (p > 0.3 || v > 0.18 || quick);
+    finishTurn(ok, false);
+  }
+  book.addEventListener('pointerup', release);
+  book.addEventListener('pointercancel', release);
+  prev.addEventListener('click', () => go(-1));
+  next.addEventListener('click', () => go(1));
   document.addEventListener('keydown', (e) => {
-    if (!opened || !book) return;
-    if (e.key === 'ArrowRight') { book.flipNext('bottom'); e.preventDefault(); }
-    if (e.key === 'ArrowLeft') { book.flipPrev('bottom'); e.preventDefault(); }
+    if (e.key === 'ArrowRight') { go(1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { go(-1); e.preventDefault(); }
   });
+  window.addEventListener('resize', () => { size(); if (cur) show(); });
 
-  // The gift: tap, the film plays, then it fades into the book's first page (the same name card).
-  const gift = document.getElementById('gift');
-  const vid = document.getElementById('giftVideo');
-  const tap = document.getElementById('tapPill');
+  // ---------------- the gift ----------------
+  size();
+  imgs.forEach((im, i) => { if (i > 1) whenReady(i); });
+  const gift = $('gift'), vid = $('giftVideo'), tap = $('tapPill');
   let state = 'closed', timer = 0;
   function settle() {
     if (state === 'open') return;
     clearTimeout(timer);
     state = 'open'; opened = true;
-    gift.classList.remove('closed');
-    gift.classList.add('gone');
+    size(); rest();
+    gift.classList.remove('closed'); gift.classList.add('gone');
     setTimeout(() => { gift.hidden = true; }, 600);
     paint();
   }
