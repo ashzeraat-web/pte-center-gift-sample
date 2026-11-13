@@ -20,9 +20,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DynaPuff:wght@500;600&family=Inter:wght@400;500;600&display=swap">
 <style>
-  /* Layout: one screen holding a small book of cards. The wrapped gift sits on top; once it opens, the name
-     card is page one. A page is turned by dragging it with a finger (either way), tapping its edge, or the arrows:
-     it swings over on its spine with light and shadow, and turning back brings the last page over again. */
+  /* Layout: one screen holding a small book. The wrapped gift sits on top of it; once the gift opens,
+     the name card is the book's first page and every card after it is turned like a real page. */
   :root {
     --ink: #15112b;
     --ink-2: #221a45;
@@ -32,8 +31,6 @@
     --on-gold: #2a1a05;
     --focus: #e4ff90;
     --line: #342a63;
-    --paper: #f3eff9;
-    --paper-2: #e2dbee;
     --shadow: rgba(6, 3, 22, 0.55);
     --font-display: "DynaPuff", "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
     --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -46,8 +43,8 @@
     height: 100%; margin: 0; overflow: hidden;
     background: radial-gradient(120% 60% at 50% 0%, #2c1d57 0%, transparent 70%) no-repeat, var(--ink);
     color: var(--fg); font-family: var(--font-body);
-    padding-left: max(18px, env(safe-area-inset-left, 0px));
-    padding-right: max(18px, env(safe-area-inset-right, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
     padding-block: 14px 12px;
     -webkit-tap-highlight-color: transparent;
   }
@@ -56,12 +53,14 @@
   .app { height: 100%; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 12px; max-width: 520px; margin-inline: auto; }
 
   .stage { min-height: 0; display: grid; place-items: center; container-type: size; }
-  .frame { position: relative; width: min(100%, 56vh); width: min(100cqw, calc(100cqh * 9 / 16)); aspect-ratio: 9 / 16; }
-  .frame::before { content: ""; position: absolute; inset: 2% 3% -1%; border-radius: var(--radius); box-shadow: 0 22px 44px var(--shadow); }
+  .frame {
+    position: relative; width: min(100%, 56vh); width: min(100cqw, calc(100cqh * 9 / 16)); aspect-ratio: 9 / 16;
+    filter: drop-shadow(0 18px 30px var(--shadow));
+  }
 
   /* the gift */
   .gift {
-    position: absolute; inset: 0; z-index: 5; display: block; padding: 0; border: 0; overflow: hidden;
+    position: absolute; inset: 0; z-index: 3; display: block; padding: 0; border: 0; overflow: hidden;
     border-radius: var(--radius); background: var(--ink-2); cursor: pointer; transition: opacity 0.5s ease;
   }
   .gift video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -76,25 +75,10 @@
     font: 600 15px/1.2 var(--font-body); white-space: nowrap; box-shadow: 0 8px 20px var(--shadow);
   }
 
-  /* the book: the page underneath, the shadow the turning page casts at the spine, and the turning page (leaf) */
-  .book { position: absolute; inset: 0; z-index: 1; perspective: 2000px; perspective-origin: 50% 50%; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
-  .book:active { cursor: grabbing; }
-  .under, .leaf, .face, .content, .shade, .spine { position: absolute; inset: 0; }
-  .under { border-radius: var(--radius); overflow: hidden; background: var(--ink-2); }
-  .spine { z-index: 2; pointer-events: none; border-radius: var(--radius); opacity: 0;
-    background: linear-gradient(to right, rgba(5, 3, 20, 0.62), rgba(5, 3, 20, 0.18) 22%, rgba(5, 3, 20, 0) 48%); }
-  .leaf { z-index: 3; transform-origin: 0 50%; transform-style: preserve-3d; will-change: transform; }
-  .face { border-radius: var(--radius); overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-  .front { background: var(--ink-2); }
-  .back { transform: rotateY(180deg); background: linear-gradient(to left, var(--paper-2), var(--paper) 18%, var(--paper) 70%, var(--paper-2)); }
-  .shade { pointer-events: none; opacity: 0; }
-  .front .shade { background: linear-gradient(to right, rgba(5, 3, 20, 0.15), rgba(5, 3, 20, 0.75)); }
-  .back .shade { background: linear-gradient(to left, rgba(5, 3, 20, 0.05), rgba(5, 3, 20, 0.55)); }
-  .front::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: var(--gloss, 0);
-    background: linear-gradient(105deg, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0.22) 50%, rgba(255, 255, 255, 0) 65%); }
-
-  .page { width: 100%; height: 100%; background: var(--ink-2); }
-  .page img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-user-drag: none; }
+  /* the book */
+  .book { position: absolute; inset: 0; z-index: 1; touch-action: none; -webkit-user-select: none; user-select: none; }
+  .page { background: var(--ink-2); overflow: hidden; }
+  .page img { display: block; width: 100%; height: 100%; object-fit: cover; user-select: none; -webkit-user-drag: none; pointer-events: none; }
   .page.keep { background: #221a45; color: var(--fg); }
   .keep-in { height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 9% 8%; }
   .keep .eyebrow { margin: 0; font: 600 12px/1.4 var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
@@ -107,7 +91,7 @@
   .keep .from { margin-top: 18px; font: 600 12px/1.4 var(--font-body); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
 
   /* arrows and page counter */
-  .nav { display: flex; align-items: center; justify-content: center; gap: 18px; position: relative; z-index: 6; }
+  .nav { display: flex; align-items: center; justify-content: center; gap: 18px; }
   .nav button {
     width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%;
     border: 1px solid var(--line); background: var(--ink-2); color: var(--fg); cursor: pointer;
@@ -129,14 +113,7 @@
 <main class="app" aria-label="Your session notes">
   <div class="stage">
     <div class="frame" id="frame">
-      <div class="book" id="book">
-        <div class="under"><div class="content" id="underC"></div></div>
-        <div class="spine" id="spine"></div>
-        <div class="leaf" id="leaf">
-          <div class="face front"><div class="content" id="frontC"></div><div class="shade" id="frontS"></div></div>
-          <div class="face back"><div class="shade" id="backS"></div></div>
-        </div>
-      </div>
+      <div class="book" id="book" aria-live="polite"></div>
       <button class="gift closed" id="gift" type="button" aria-label="Open your gift">
         <video id="giftVideo" muted playsinline preload="auto" poster="poster.jpg" width="1080" height="1920" aria-hidden="true">
           <source src="gift.mp4" type="video/mp4">
@@ -147,12 +124,12 @@
   </div>
   <nav class="nav" aria-label="Pages">
     <button id="prev" type="button" aria-label="Previous page" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-    <span class="count" id="count" aria-live="polite">Tap the gift</span>
+    <span class="count" id="count">Tap the gift</span>
     <button id="next" type="button" aria-label="Next page" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
   </nav>
 </main>
 
-<!-- the pages of the book -->
+<!-- the book's pages, handed to the page-turn library -->
 <div id="pages" hidden>
   <div class="page"><img src="01-cover.jpg" alt="For Sam: The City That Started Christmas Early. Session 3, from PTE CENTER."></div>
   <div class="page"><img src="02-numbers.jpg" alt="You did the talking: your speaking time, words and longest answer."></div>
@@ -175,141 +152,72 @@
     <p>The same cards in one PDF file, to keep on your phone and look back on before your next session.</p>
     <a class="save" href="notes.pdf" download="PTE-CENTER-Session-03-Notes.pdf">Save the PDF</a>
     <p class="from">From PTE CENTER</p>
-  </div></div>
+    </div></div>
 </div>
 
+<script src="page-flip.browser.js"></script>
 <script>
 (() => {
-  const $ = (id) => document.getElementById(id);
-  const book = $('book'), leaf = $('leaf'), spine = $('spine');
-  const frontC = $('frontC'), underC = $('underC'), frontS = $('frontS'), backS = $('backS');
-  const count = $('count'), prev = $('prev'), next = $('next');
+  const frame = document.getElementById('frame');
+  const bookEl = document.getElementById('book');
+  const count = document.getElementById('count');
+  const prev = document.getElementById('prev');
+  const next = document.getElementById('next');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const pages = [...document.querySelectorAll('#pages > .page')];
-  const N = pages.length;
-  let at = 0, angle = 0, opened = false, turned = false, anim = 0, mode = null;
-
-  // decode the card images up front so a turned page never shows blank
-  pages.forEach((p) => { const im = p.querySelector('img'); if (im && im.decode) im.decode().catch(() => {}); });
-
-  function put(el, i) { el.replaceChildren(i >= 0 && i < N ? pages[i].cloneNode(true) : document.createElement('div')); }
-
-  // angle: 0 = the leaf lies flat on the book, 180 = it has been turned over to the left
-  function setAngle(a) {
-    angle = a;
-    leaf.style.transform = 'rotateY(' + (-a) + 'deg)';
-    const lift = Math.sin(a * Math.PI / 180);
-    frontS.style.opacity = (Math.min(a, 90) / 90 * 0.55).toFixed(3);
-    backS.style.opacity = (a > 90 ? (180 - a) / 90 * 0.6 : 0.6).toFixed(3);
-    spine.style.opacity = (lift * 0.95).toFixed(3);
-    leaf.style.setProperty('--gloss', (a < 90 ? lift * 0.9 : 0).toFixed(3));
-  }
-  function rest() { mode = null; put(frontC, at); put(underC, at + 1); setAngle(0); }
-  function beginNext() { mode = 'next'; put(frontC, at); put(underC, at + 1); setAngle(0); }
-  function beginPrev() { mode = 'prev'; put(frontC, at - 1); put(underC, at); setAngle(180); }
+  const source = [...document.querySelectorAll('#pages .page')];
+  const n = source.length;
+  let book = null, at = 0, opened = false, turned = false;
 
   function paint() {
     if (!opened) return;
     prev.disabled = at === 0;
-    next.disabled = at >= N - 1;
+    next.disabled = at >= n - 1;
     const hint = !turned && at === 0;
-    count.textContent = hint ? 'Turn the page' : (at + 1) + ' / ' + N;
+    count.textContent = hint ? 'Turn the page' : (at + 1) + ' / ' + n;
     next.classList.toggle('pulse', hint);
   }
 
-  const easeOut = (u) => 1 - Math.pow(1 - u, 3);
-  // a turn is drawn from a curve u -> angle; most of the time goes to the half of the turn that is on screen (0-95 degrees)
-  function run(curve, dur, done) {
-    cancelAnimationFrame(anim);
-    if (reduce.matches) { setAngle(curve(1)); anim = 0; done(); return; }
-    const t0 = performance.now();
-    const step = (now) => {
-      const u = Math.min(1, (now - t0) / dur);
-      setAngle(curve(u));
-      if (u < 1) anim = requestAnimationFrame(step); else { anim = 0; done(); }
-    };
-    anim = requestAnimationFrame(step);
+  // The book is sized to the frame; it is rebuilt if the screen size changes (a phone turned sideways).
+  function build(startAt) {
+    const r = frame.getBoundingClientRect();
+    const w = Math.round(r.width), h = Math.round(r.height);
+    if (book) { try { book.destroy(); } catch (e) {} bookEl.replaceChildren(); }
+    const holder = document.createElement('div');
+    bookEl.appendChild(holder);
+    book = new St.PageFlip(holder, {
+      width: w, height: h, size: 'fixed', usePortrait: true, autoSize: true, showCover: false,
+      drawShadow: true, maxShadowOpacity: 0.55, flippingTime: reduce.matches ? 250 : 850,
+      startPage: startAt || 0, swipeDistance: 20, showPageCorners: true, mobileScrollSupport: true,
+    });
+    book.on('flip', (e) => { at = e.data; if (at > 0) turned = true; paint(); });
+    book.loadFromHTML(source.map((p) => p.cloneNode(true)));
   }
-  const sine = (u) => -(Math.cos(Math.PI * u) - 1) / 2;
-  const turnOn = (u) => (u <= 0.72 ? 95 * sine(u / 0.72) : 95 + 85 * easeOut((u - 0.72) / 0.28));
-  const turnBack = (u) => (u <= 0.2 ? 180 - 85 * (u / 0.2) : 95 * (1 - sine((u - 0.2) / 0.8)));
-  // from wherever a drag was let go, ease to the end or back to the start
-  function animateTo(target, ease, done) {
-    const from = angle, span = Math.abs(target - from);
-    if (span < 0.5) { setAngle(target); done(); return; }
-    const seen = Math.abs(Math.min(Math.max(target, 0), 95) - Math.min(Math.max(from, 0), 95));
-    run((u) => from + (target - from) * ease(u), 140 + 380 * seen / 95 + 80 * (span - seen) / 85, done);
-  }
-  function finish(dir, completed) {
-    if (completed) { at += dir; if (at > 0) turned = true; }
-    rest(); paint();
-  }
-  function go(dir) {
-    if (!opened || anim || mode) return;
-    if (dir > 0 && at < N - 1) { beginNext(); run(turnOn, 640, () => finish(1, true)); }
-    if (dir < 0 && at > 0) { beginPrev(); run(turnBack, 700, () => finish(-1, true)); }
-  }
-
-  // finger, pen or mouse: the page follows the drag; let go past a third of the way (or flick) and it turns
-  let drag = null;
-  book.addEventListener('pointerdown', (e) => {
-    if (!opened || anim || mode || (e.button !== undefined && e.button > 0)) return;
-    if (e.target.closest('a, button')) return;
-    drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t0: performance.now(), dir: 0, trail: [[performance.now(), e.clientX]] };
-    try { book.setPointerCapture(e.pointerId); } catch (err) {}
+  build(0);
+  let resizeTimer = 0;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => build(at), 200);
   });
-  book.addEventListener('pointermove', (e) => {
-    if (!drag || e.pointerId !== drag.id) return;
-    const dx = e.clientX - drag.x0;
-    if (!drag.dir) {
-      if (Math.abs(dx) < 6) return;
-      if (dx < 0 && at < N - 1) { drag.dir = 1; beginNext(); }
-      else if (dx > 0 && at > 0) { drag.dir = -1; beginPrev(); }
-      else { drag.dir = 2; }
-    }
-    const now = performance.now();
-    drag.trail.push([now, e.clientX]);
-    while (drag.trail.length > 2 && now - drag.trail[0][0] > 110) drag.trail.shift();
-    const w = book.clientWidth;
-    if (drag.dir === 1) setAngle(Math.acos(1 - 2 * Math.max(0, Math.min(1, -dx / (w * 0.92)))) * 180 / Math.PI);
-    if (drag.dir === -1) setAngle(112 * (1 - Math.max(0, Math.min(1, dx / (w * 0.85)))));
-  });
-  function release(e) {
-    if (!drag || e.pointerId !== drag.id) return;
-    const d = drag; drag = null;
-    const dx = e.clientX - d.x0, dy = e.clientY - d.y0;
-    if (!d.dir) {
-      if (Math.abs(dy) > 12) return;   // a short vertical nudge: do nothing
-      const r = book.getBoundingClientRect();
-      go((e.clientX - r.left) / r.width >= 0.5 ? 1 : -1);   // a tap: right half turns on, left half turns back
-      return;
-    }
-    if (d.dir === 2) return;
-    const t = d.trail, v = t.length > 1 ? (t[t.length - 1][1] - t[0][1]) / Math.max(1, t[t.length - 1][0] - t[0][0]) : 0;
-    const p = Math.abs(dx) / (book.clientWidth * 0.9);
-    const quick = performance.now() - d.t0 < 330 && Math.abs(dx) > 36;   // a short, fast swipe
-    if (d.dir === 1) { const ok = p > 0.3 || v < -0.18 || quick; animateTo(ok ? 180 : 0, easeOut, () => finish(1, ok)); }
-    else { const ok = p > 0.3 || v > 0.18 || quick; animateTo(ok ? 0 : 180, easeOut, () => finish(-1, ok)); }
-  }
-  book.addEventListener('pointerup', release);
-  book.addEventListener('pointercancel', release);
 
-  prev.addEventListener('click', () => go(-1));
-  next.addEventListener('click', () => go(1));
+  prev.addEventListener('click', () => book && book.flipPrev('bottom'));
+  next.addEventListener('click', () => book && book.flipNext('bottom'));
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') { go(1); e.preventDefault(); }
-    if (e.key === 'ArrowLeft') { go(-1); e.preventDefault(); }
+    if (!opened || !book) return;
+    if (e.key === 'ArrowRight') { book.flipNext('bottom'); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { book.flipPrev('bottom'); e.preventDefault(); }
   });
-  rest();
 
-  // the gift: tap, the film plays, then it fades away onto page one (the same name card)
-  const gift = $('gift'), vid = $('giftVideo'), tap = $('tapPill');
+  // The gift: tap, the film plays, then it fades into the book's first page (the same name card).
+  const gift = document.getElementById('gift');
+  const vid = document.getElementById('giftVideo');
+  const tap = document.getElementById('tapPill');
   let state = 'closed', timer = 0;
   function settle() {
     if (state === 'open') return;
     clearTimeout(timer);
     state = 'open'; opened = true;
-    gift.classList.remove('closed'); gift.classList.add('gone');
+    gift.classList.remove('closed');
+    gift.classList.add('gone');
     setTimeout(() => { gift.hidden = true; }, 600);
     paint();
   }
